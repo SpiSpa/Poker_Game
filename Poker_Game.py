@@ -41,7 +41,7 @@ def one_pair(hand):
         print(rankList)
         return(rankList)
     else:
-        return(False)
+        return([False])
     
 def two_pair(hand):
     cardCombos = []
@@ -63,14 +63,12 @@ def two_pair(hand):
             faceList.remove(pairList[i])
         rankList.insert(4, get_int(faceList[0]))
         rankList.insert(0, True)
-        print(rankList)
         return(rankList)
     else:
-        return(False)
+        return([False])
 
 def three_of_a_kind(hand):
     faceList = sorted(map(lambda x: x[0], hand))
-    print(faceList)
     rankList = [True]
     if faceList[0] == faceList[1] == faceList[2] and faceList[3] != faceList[4]: # make sure you don't have a full house
         for i in faceList[0:3]:
@@ -91,7 +89,7 @@ def three_of_a_kind(hand):
         rankList = rankList +leftOverCards
         return(rankList)
     else:
-        return(False)
+        return([False])
 
 def full_house(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
@@ -109,7 +107,7 @@ def full_house(hand):
             rankList.append(get_int(i))
         return(rankList)
     else:
-        return(False)
+        return([False])
 
 def four_of_a_kind(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
@@ -125,37 +123,48 @@ def four_of_a_kind(hand):
         rankList.append(get_int(faceList[0]))
         return(rankList)
     else:
-        return(False)
+        return([False])
 
 def flush(hand):
     suitList = list(map(lambda x: x[1], hand))
+    faceList = list(map(lambda x: x[0], hand))
     if suitList[0] == suitList[1] == suitList[2] == suitList[3] == suitList[4]:
-        return(True)
+        rankList = []
+        for i in faceList:
+            rankList.append(get_int(i))
+        rankList = sorted(rankList, reverse=True)
+        rankList.insert(0, True)
+        return(rankList)
     else:
-        return(False)
+        return([False])
     
 def straight(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
     face = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 
             'Nine', 'Ten', 'Jack', 'Queen', 'King', 'Ace'] #aces can act as high or low card here
     straightList = []
-    for i in range(len(face)-5):
+    for i in range(len(face)-4):
         straightList.append(sorted(face[i:i+5]))
     for i in straightList:
         if i == faceList: #TODO: special case for Aces low
-            return(True)
-    return(False)
-
-def straight_flush(hand):   #TODO test this one with the straight and the flush
-    rankList = []
-    if straight(hand) == True and flush(hand) == True:
-        for i in hand:
-            rankList.append = (get_int(i[0]))
-            rankList = sorted(rankList)
+            rankList = []
+            for j in faceList:
+                rankList.append(get_int(j))
+            rankList = sorted(rankList, reverse=True)
             rankList.insert(0, True)
+            return(rankList)
+    return([False])
+
+def straight_flush(hand):   
+    rankList = []
+    if straight(hand)[0] == True and flush(hand)[0] == True:
+        for i in hand:
+            rankList.append(get_int(i[0]))
+            rankList = sorted(rankList, reverse=True)
+        rankList.insert(0, True)
         return(rankList)
     else:
-        return(False)
+        return([False])
 
 def royal_flush(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
@@ -164,7 +173,7 @@ def royal_flush(hand):
         rankList = [True, 14, 13, 12, 11, 10]
         return(rankList)
     else:
-        return(False)
+        return([False])
         
 def high_card(hand):
     print()
@@ -176,7 +185,7 @@ do flush in ranking with other stuff
 
 #deck = initalize_deck()
 #hand = deal(deck)
-hand = [('Jack', 'Hearts'), ('Nine', 'Hearts'), ('Jack', 'Diamonds'), ('Ten', 'Hearts'), ('Queen', 'Hearts')]
+hand = [('King', 'Hearts'), ('Queen', 'Hearts'), ('Jack', 'Hearts'), ('Ace', 'Hearts'), ('Ten', 'Hearts')]
 print(hand)
 onePair = one_pair(hand)
 print("found one pair?:", onePair)
