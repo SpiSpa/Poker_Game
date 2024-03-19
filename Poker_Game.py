@@ -15,6 +15,11 @@ def initalize_deck():
 def deal(deck):
     return(deck[0:5])
 
+def get_int(face):
+    face_dictionary = {'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8, 
+            'Nine': 9, 'Ten': 10, 'Jack': 11, 'Queen': 12, 'King': 13, 'Ace': 14}
+    return(face_dictionary.get(face))
+
 def one_pair(hand):
     cardCombos = []
     count = 0
@@ -25,14 +30,24 @@ def one_pair(hand):
     for i in cardCombos:
         if i[0] == i[1]:
             count += 1
+            pairFace = i[0]
     if count == 1:
-        return(True, i[0])
+        rankList = [True, get_int(pairFace), get_int(pairFace)] #building list of all 5 cards, one pair in index 0 and 1
+        faceList.remove(pairFace)
+        faceList.remove(pairFace)
+        print(faceList)
+        leftoverList = sorted([get_int(faceList[0]), get_int(faceList[1]), get_int(faceList[2])], reverse=True)
+        rankList += leftoverList
+        print(rankList)
+        return(rankList)
     else:
         return(False)
     
 def two_pair(hand):
     cardCombos = []
     count = 0
+    pairList = []
+    rankList = []
     faceList = list(map(lambda x: x[0], hand))
     for i in range(len(faceList)):
         for j in range(i+1, len(faceList)):
@@ -40,37 +55,75 @@ def two_pair(hand):
     for i in cardCombos:
         if i[0] == i[1]:
             count += 1
+            pairList += [i[0], i[1]]
     if count == 2:
-        return(True)
+        rankList = sorted([get_int(pairList[0]), get_int(pairList[1]), 
+                                    get_int(pairList[2]), get_int(pairList[3])], reverse=True)
+        for i in range(4):
+            faceList.remove(pairList[i])
+        rankList.insert(4, get_int(faceList[0]))
+        rankList.insert(0, True)
+        print(rankList)
+        return(rankList)
     else:
         return(False)
 
 def three_of_a_kind(hand):
     faceList = sorted(map(lambda x: x[0], hand))
+    print(faceList)
+    rankList = [True]
     if faceList[0] == faceList[1] == faceList[2] and faceList[3] != faceList[4]: # make sure you don't have a full house
-        return(True, faceList[0])
+        for i in faceList[0:3]:
+            rankList.append(get_int(i))
+        leftOverCards = sorted([get_int(faceList[3]), get_int(faceList[4])], reverse=True)
+        rankList = rankList + leftOverCards
+        return(rankList)
     elif faceList[1] == faceList[2] == faceList[3]:
-        return(True, faceList[1])
-    elif faceList[2] == faceList[3] == faceList[4] and faceList[1] != faceList[2]:
-        return(True, faceList[2])
+        for i in faceList[1:4]:
+            rankList.append(get_int(i))
+        leftOverCards = sorted([get_int(faceList[0]), get_int(faceList[4])], reverse=True)
+        rankList = rankList + leftOverCards
+        return(rankList)
+    elif faceList[2] == faceList[3] == faceList[4] and faceList[0] != faceList[1]:
+        for i in faceList[2:5]:
+            rankList.append(get_int(i))
+        leftOverCards = sorted([get_int(faceList[0]), get_int(faceList[1])], reverse=True)
+        rankList = rankList +leftOverCards
+        return(rankList)
     else:
         return(False)
 
 def full_house(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
+    
     if faceList[0] == faceList[1] == faceList[2] and faceList[3] == faceList[4]:
-        return(True)
+        rankList = [True]
+        for i in faceList:
+            rankList.append(get_int(i))
+        return(rankList)
     elif faceList[0] == faceList[1] and faceList[2] == faceList[3] == faceList[4]:
-        return(True)
+        rankList =[True]
+        for i in faceList[2:5]:
+            rankList.append(get_int(i))
+        for i in faceList[0:2]:
+            rankList.append(get_int(i))
+        return(rankList)
     else:
         return(False)
 
 def four_of_a_kind(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
     if faceList[0] == faceList[1] == faceList[2] == faceList[3]:
-        return(True, faceList[0])
+        rankList = [True]
+        for i in faceList:
+            rankList.append(get_int(i))
+        return(rankList)
     elif faceList[1] == faceList[2] == faceList[3] == faceList[4]:
-        return(True, faceList[1])
+        rankList = [True]
+        for i in faceList[1:5]:
+            rankList.append(get_int(i))
+        rankList.append(get_int(faceList[0]))
+        return(rankList)
     else:
         return(False)
 
@@ -89,13 +142,18 @@ def straight(hand):
     for i in range(len(face)-5):
         straightList.append(sorted(face[i:i+5]))
     for i in straightList:
-        if i == faceList:
+        if i == faceList: #TODO: special case for Aces low
             return(True)
     return(False)
 
-def straight_flush(hand):
+def straight_flush(hand):   #TODO test this one with the straight and the flush
+    rankList = []
     if straight(hand) == True and flush(hand) == True:
-        return(True)
+        for i in hand:
+            rankList.append = (get_int(i[0]))
+            rankList = sorted(rankList)
+            rankList.insert(0, True)
+        return(rankList)
     else:
         return(False)
 
@@ -103,7 +161,8 @@ def royal_flush(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
     royalSuits = ['Ace', 'King', 'Queen', 'Jack', 'Ten']
     if (sorted(royalSuits) == sorted(faceList)) and flush(hand) == True:
-        return(True)
+        rankList = [True, 14, 13, 12, 11, 10]
+        return(rankList)
     else:
         return(False)
         
