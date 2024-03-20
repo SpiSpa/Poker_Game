@@ -1,5 +1,4 @@
 import random
-
 def initalize_deck():
     face = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 
             'Nine', 'Ten', 'Jack', 'Queen', 'King']
@@ -12,13 +11,22 @@ def initalize_deck():
     random.shuffle(deck)
     return(deck)
 
-def deal(deck):
-    return(deck[0:5])
+def deal():
+    global deck
+    hand = deck[0:5]
+    for i in range(5):
+        deck.pop(0)
+    return(hand)
 
 def get_int(face):
     face_dictionary = {'Two': 2, 'Three': 3, 'Four': 4, 'Five': 5, 'Six': 6, 'Seven': 7, 'Eight': 8, 
             'Nine': 9, 'Ten': 10, 'Jack': 11, 'Queen': 12, 'King': 13, 'Ace': 14}
     return(face_dictionary.get(face))
+
+def get_result_dict(rating):
+    rank_dictionary = {10: 'Royal Flush', 9: 'Straight Flush', 8: 'Four of a Kind', 7: 'Full House', 6: 'Flush', 
+                       5: 'Straight', 4: 'Three of a Kind', 3: 'Two Pairs', 2: 'One Pair', 1: 'High Card'}
+    return(rank_dictionary.get(rating))
 
 def one_pair(hand):
     cardCombos = []
@@ -35,10 +43,8 @@ def one_pair(hand):
         rankList = [True, get_int(pairFace), get_int(pairFace)] #building list of all 5 cards, one pair in index 0 and 1
         faceList.remove(pairFace)
         faceList.remove(pairFace)
-        print(faceList)
         leftoverList = sorted([get_int(faceList[0]), get_int(faceList[1]), get_int(faceList[2])], reverse=True)
         rankList += leftoverList
-        print(rankList)
         return(rankList)
     else:
         return([False])
@@ -169,7 +175,7 @@ def straight_flush(hand):
 def royal_flush(hand):
     faceList = sorted(list(map(lambda x: x[0], hand)))
     royalSuits = ['Ace', 'King', 'Queen', 'Jack', 'Ten']
-    if (sorted(royalSuits) == sorted(faceList)) and flush(hand) == True:
+    if (sorted(royalSuits) == sorted(faceList)) and flush(hand)[0] == True:
         rankList = [True, 14, 13, 12, 11, 10]
         return(rankList)
     else:
@@ -178,38 +184,74 @@ def royal_flush(hand):
 def high_card(hand):
     print()
 
-'''TODO: 
-high card
-do flush in ranking with other stuff
-'''
+def rated_hand(hand):
+    if royal_flush(hand)[0] == True:
+        ratedHand = royal_flush(hand)
+        ratedHand[0] = 10
+        return(ratedHand)
+    elif straight_flush(hand)[0] == True:
+        ratedHand = straight_flush(hand)
+        ratedHand[0] = 9
+        return(ratedHand)
+    elif four_of_a_kind(hand)[0] == True:
+        ratedHand = four_of_a_kind(hand)
+        ratedHand[0] = 8
+        return(ratedHand)
+    elif full_house(hand)[0] == True:
+        ratedHand = full_house(hand)
+        ratedHand[0] = 7
+        return(ratedHand)
+    elif flush(hand)[0] == True:
+        ratedHand = flush(hand)
+        ratedHand[0] = 6
+        return(ratedHand)
+    elif straight(hand)[0] == True:
+        ratedHand = straight(hand)
+        ratedHand[0] = 5
+        return(ratedHand)
+    elif three_of_a_kind(hand)[0] == True:
+        ratedHand = three_of_a_kind(hand)
+        ratedHand[0] = 4
+        return(ratedHand)
+    elif two_pair(hand)[0] == True:
+        ratedHand = two_pair(hand)
+        ratedHand[0] = 3
+        return(ratedHand)
+    elif one_pair(hand)[0] == True:
+        ratedHand = one_pair(hand)
+        ratedHand[0] = 2
+        return(ratedHand)
+    else: #finding high card   #TODO: this part is broken
+        faceList = sorted(list(map(lambda x: x[0], hand)))
+        ratedHand = []
+        for i in faceList:
+            ratedHand.append(get_int(i))
+        ratedHand = sorted(ratedHand, reverse=True)
+        ratedHand.insert(0, 1)
+        return(ratedHand)
 
-#deck = initalize_deck()
-#hand = deal(deck)
-hand = [('King', 'Hearts'), ('Queen', 'Hearts'), ('Jack', 'Hearts'), ('Ace', 'Hearts'), ('Ten', 'Hearts')]
-print(hand)
-onePair = one_pair(hand)
-print("found one pair?:", onePair)
-twoPair = two_pair(hand)
-print("found two pairs?: ", twoPair)
-threeOfAKind = three_of_a_kind(hand)
-print('Found three of a kind?: ', threeOfAKind)
-fourOfAKind = four_of_a_kind(hand)
-print('Found four of a kind?:', fourOfAKind)
-flushResult = flush(hand)
-print('fount a flush?:', flushResult)
-straightResult = straight(hand)
-print('found a straight?', straightResult)
-straightFlush = straight_flush(hand)
-print('found a straight flush?:', straightFlush)
-print('found a royal flush?:', royal_flush(hand))
-print('found a full house?:', full_house(hand))
-
-
-'''
-for i in range(len(deck)):
-    displayString = deck[i][0]+ " of " + deck[i][1]
-    if i % 4 != 3:
-        print(f'{displayString:<22}', end="")
+def show_results(ratedHand1, ratedHand2, hand1, hand2):
+    
+    if ratedHand1 > ratedHand2:
+        print("hand 1 wins! They have a", get_result_dict(ratedHand1[0]), "\n")
+        print("Hand 1 results", hand1, "\n")
+        print("Hand 2 results", hand2)
+    elif ratedHand1 < ratedHand2:
+        print("hand 2 wins! They have a", get_result_dict(ratedHand2[0]), "\n")
+        print("Hand 1 results", hand1, "\n")
+        print("Hand 2 results", hand2)
     else:
-        print(deck[i][0], "of", deck[i][1])
-'''
+        print("It's a tie! with a ", get_result_dict(ratedHand1[0]), "\n")
+        print("Hand 1 results", hand1, "\n")
+        print("Hand 2 results", hand2)
+    print()
+
+deck = initalize_deck()
+hand1 = [('Four', 'Puppy Paws'), ('King', 'Hearts'), ('Queen', 'Puppy Paws'), ('Jack', 'Spades'), ('Ace', 'Hearts')] 
+hand2 = [('Eight', 'Puppy Paws'), ('Nine', 'Diamonds'), ('Ace', 'Spades'), ('Four', 'Spades'), ('Queen', 'Diamonds')]
+
+hand1 = deal()
+hand2 = deal()
+ratedHand1 = rated_hand(hand1)
+ratedHand2 = rated_hand(hand2)
+show_results(ratedHand1, ratedHand2, hand1, hand2)
